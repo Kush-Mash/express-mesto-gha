@@ -1,23 +1,31 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
+
 const { ObjectId } = mongoose.Schema.Types;
 
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
-    minlength: 2,
-    maxlength: 30
+    required: [true, 'Обязательное поле'],
+    minlength: [2, 'Минимальная длина названия - 2'],
+    maxlength: [30, 'Максимальная длина поля названия - 30'],
   },
   link: {
     type: String,
-    required: true,
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: 'Некорректный URL',
+    },
+    required: [true, 'Обязательное поле'],
   },
   owner: {
     type: ObjectId,
-    required: true
+    ref: 'user',
+    required: [true, 'Обязательное поле'],
   },
   likes: [{
     type: ObjectId,
+    ref: 'user',
     default: []
   }],
   createdAt: {

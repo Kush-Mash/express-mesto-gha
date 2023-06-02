@@ -24,6 +24,8 @@ Back-end для проекта Mesto.
 * Express.js
 * MongoDB
 * Mongoose
+* NPM
+* Validator.js
 
 ## Основные директории
 

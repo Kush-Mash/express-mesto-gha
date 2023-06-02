@@ -46,10 +46,11 @@ const createUser = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
+    .orFail(new Error('NotFound'))
     .then((users) => res.send(users))
     .catch((err) => {
       console.log(err);
-      if (err instanceof mongoose.Error.MissingSchemaError) {
+      if (err.message === 'NotFound') {
         res.status(statusNotFound).send({
           message: 'Пользователь по указанному id не найден',
           err: err.message,
@@ -73,7 +74,7 @@ const getUserById = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
@@ -84,7 +85,7 @@ const updateUser = (req, res) => {
         });
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
         res.status(statusNotFound).send({
-          message: 'Пользователь по указанному id не найден',
+          message: 'Пользователь с указанным id не найден',
           err: err.message,
           stack: err.stack,
         });
@@ -100,11 +101,11 @@ const updateUser = (req, res) => {
 
 const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         res.status(statusNotFound).send({
-          message: 'Пользователь по указанному id не найден',
+          message: 'Пользователь с указанным id не найден',
         });
       } else {
         res.send({ user });
