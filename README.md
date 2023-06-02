@@ -1,6 +1,12 @@
 [![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto фронтенд + бэкенд
 
+
+### Ссылка на репозиторий
+
+https://github.com/Kush-Mash/express-mesto-gha
+
+
 ## О проекте
 
 Back-end для проекта Mesto.
@@ -31,5 +37,3 @@ Back-end для проекта Mesto.
 
 `npm run start` — запускает сервер   
 `npm run dev` — запускает сервер с hot-reload
-
-[Ссылка на back-end приложения Mesto](https://kush-mash.github.io/express-mesto-gha/)
