@@ -2,8 +2,7 @@
 # Проект Mesto фронтенд + бэкенд
 
 
-### Ссылка на репозиторий
-https://github.com/Kush-Mash/express-mesto-gha
+### Ссылка на репозиторий: https://github.com/Kush-Mash/express-mesto-gha
 
 
 ## О проекте
