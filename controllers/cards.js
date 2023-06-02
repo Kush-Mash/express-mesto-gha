@@ -44,15 +44,14 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        res.status(statusNotFound).send({ message: 'Карточка с указанным id не найдена.' });
+      } else {
+        res.send({ card });
+      }
+    })
     .catch((err) => {
-      if (err instanceof Error.DocumentNotFoundError) {
-        res.status(statusNotFound).send({
-          message: 'Карточка с указанным id не найдена',
-          err: err.message,
-          stack: err.stack
-        });
-      } else
       if (err instanceof mongoose.Error.CastError) {
         res.status(statusBadRequest).send({
           message: 'Переданы некорректные данные при удалении карточки',
