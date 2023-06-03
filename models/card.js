@@ -13,7 +13,7 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     validate: {
-      validator: (v) => validator.isURL(v),
+      validator: (valid) => validator.isURL(valid),
       message: 'Некорректный URL',
     },
     required: [true, 'Обязательное поле'],
@@ -26,12 +26,12 @@ const cardSchema = new mongoose.Schema({
   likes: [{
     type: ObjectId,
     ref: 'user',
-    default: []
+    default: [],
   }],
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('card', cardSchema);

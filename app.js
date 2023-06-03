@@ -1,11 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes');
+
 const app = express();
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '6477671da8a65a9825b68633' // _id созданного пользователя
+    _id: '64786efb0f9fe2d39ed85941',
   };
 
   next();
@@ -17,8 +18,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb')
       console.log('слушаем запросы на 3000 порту');
     });
   })
-  .catch((err) => {
-    console.log(err);
+  .catch(() => {
     process.exit();
   });
 
