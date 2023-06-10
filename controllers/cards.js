@@ -3,11 +3,7 @@ const Card = require('../models/card');
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } = require('../utils/constants');
-const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
 const UnhandledError = require('../errors/UnhandledError');
 const NotFoundError = require('../errors/NotFoundError');
@@ -37,7 +33,6 @@ const createCard = (req, res, next) => {
     .catch(next);
 };
 
-// не работает ошибка прав доступа, выходит ошибка, а карточка удаляется
 const deleteCard = (req, res, next) => {
   const { _id } = req.user;
   Card.findByIdAndRemove(req.params.cardId)

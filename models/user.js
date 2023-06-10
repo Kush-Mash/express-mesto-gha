@@ -7,14 +7,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    // validate: {
-    //   validator: (v) => isEmail(v),
-    //   message: 'Неправильный формат почты',
-    // },
+    validate: {
+      validator: (v) => isEmail(v),
+      message: 'Неправильный формат почты',
+    },
   },
   password: {
     type: String,
-    required: true,
+    required: [true, 'Обязательное поле'],
     minlength: 8,
     select: false, // по умолчанию хеш пароля пользователя не будет возвращаться из базы
   },

@@ -5,10 +5,6 @@ const signToken = require('../utils/jwtAuth').signToken;
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_CONFLICT,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   MONGO_DUPLICATE_KEY_ERROR,
   SALT_ROUNDS,
 } = require('../utils/constants');
@@ -17,8 +13,6 @@ const ValidationError = require('../errors/ValidationError');
 const UnhandledError = require('../errors/UnhandledError');
 const NotFoundError = require('../errors/NotFoundError');
 
-// Не попадает в нужную ошибку при неверном пароле
-// 401 ошибку обработать
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -28,13 +22,9 @@ const login = (req, res, next) => {
       throw new Error('badRequestUser');
     })
     .then((user) => {
-      console.log(user);
-
       return Promise.all([user, bcrypt.compare(password, user.password)]);
     })
     .then(([user, isEqual]) => {
-      // console.log('isEqual: ', isEqual);
-
       if (!isEqual) {
         throw new ValidationError('Переданы некорректные данные при создании пользователя');
       }
@@ -64,23 +54,22 @@ const getUsers = (req, res, next) => {
 const createUser = (req, res, next) => {
   const { email, password, name, about, avatar } = req.body;
 
-  bcrypt.hash(password, SALT_ROUNDS).then(function(hash) {
-
+  bcrypt.hash(password, SALT_ROUNDS).then((hash) => {
     User.create({ email, password: hash, name, about, avatar })
-    .then(() => {
-      res.status(HTTP_STATUS_CREATED).send({ email, name, about, avatar });
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        throw new ValidationError('Переданы некорректные данные при создании пользователя');
-      } else if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
-        throw new ConflictError('Такой пользователь уже существует');
-      } else {
-        throw new UnhandledError('Ошибка сервера');
-      }
-    })
-    .catch(next);
-  })
+      .then(() => {
+        res.status(HTTP_STATUS_CREATED).send({ email, name, about, avatar });
+      })
+      .catch((err) => {
+        if (err instanceof mongoose.Error.ValidationError) {
+          throw new ValidationError('Переданы некорректные данные при создании пользователя');
+        } else if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
+          throw new ConflictError('Такой пользователь уже существует');
+        } else {
+          throw new UnhandledError('Ошибка сервера');
+        }
+      })
+      .catch(next);
+  });
 };
 
 const getUserById = (req, res, next) => {
@@ -147,6 +136,17 @@ const updateUserAvatar = (req, res, next) => {
     .catch(next);
 };
 
+const getCurrentUser = (req, res, next) => {
+  const userId = req.user._id;
+  User.findById(userId).then((user) => {
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    res.send(user);
+  })
+    .catch(next);
+};
+
 module.exports = {
   login,
   getUsers,
@@ -154,4 +154,5 @@ module.exports = {
   getUserById,
   updateUser,
   updateUserAvatar,
+  getCurrentUser,
 };

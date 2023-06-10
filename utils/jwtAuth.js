@@ -8,7 +8,6 @@ const checkToken = (token) => {
 
 const signToken = (payload) => {
   return jwt.sign(payload, SECRET_KEY)
-  // console.log(token);
 };
 
 module.exports = {

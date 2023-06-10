@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const { checkToken } = require('../utils/jwtAuth');
-const HTTP_STATUS_UNAUTHORIZED = require('../utils/constants');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
-// 401 ошибку обработать HTTP_STATUS_UNAUTHORIZED
 const auth = (req, res, next) => {
   if (!req.headers.authorization) {
-    return res.status(HTTP_STATUS_UNAUTHORIZED).send({ message: 'Пользователь не авторизован' });
+    throw new UnauthorizedError('Пользователь не авторизован');
   }
 
   const token = req.headers.authorization.replace('Bearer ', '');
@@ -18,8 +17,9 @@ const auth = (req, res, next) => {
     };
     next();
   } catch (err) {
-    return res.status(HTTP_STATUS_UNAUTHORIZED).send({ message: 'Пользователь не авторизован' });
+    throw new UnauthorizedError('Пользователь не авторизован');
   }
+  // return next();
 };
 
 module.exports = auth;
