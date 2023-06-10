@@ -12,6 +12,7 @@ const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
 const UnhandledError = require('../errors/UnhandledError');
 const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
@@ -19,7 +20,7 @@ const login = (req, res, next) => {
   User.findOne({ email })
     .select('+password')
     .orFail(() => {
-      throw new Error('badRequestUser');
+      throw new Error('Unauthorized');
     })
     .then((user) => {
       return Promise.all([user, bcrypt.compare(password, user.password)]);
@@ -34,8 +35,8 @@ const login = (req, res, next) => {
       res.status(HTTP_STATUS_OK).send({ message: 'авторизован', token });
     })
     .catch((err) => {
-      if (err.message === 'badRequestUser') {
-        throw new ValidationError('Переданы некорректные данные при создании пользователя');
+      if (err.message === 'Unauthorized') {
+        throw new UnauthorizedError('Пользователь не авторизован');
       }
       throw new UnhandledError('Ошибка сервера');
     })
