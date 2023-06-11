@@ -34,23 +34,21 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  const { _id } = req.user;
-  Card.findByIdAndRemove(req.params.cardId)
+  const { cardId } = req.params;
+  const { _id } = req.user._id;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
+        throw new NotFoundError('Передан несуществующий id карточки');
       } else if (card.owner.valueOf() !== _id) {
         throw new ForbiddenError('Отсутствуют права доступа для удаления данной карточки');
-      } else {
-        res.send({ card });
       }
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        throw new ValidationError('Передан некорректный id при удалении карточки');
-      } else {
-        throw new UnhandledError('Ошибка сервера');
-      }
+      Card.findByIdAndRemove(cardId)
+        .then((card) => res.send(card))
+        .catch(() => {
+          throw new UnhandledError('Ошибка сервера');
+        })
+        .catch(next);
     })
     .catch(next);
 };
