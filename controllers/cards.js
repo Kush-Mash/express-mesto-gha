@@ -35,7 +35,6 @@ const createCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  // const { userId } = req.user._id;
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
@@ -60,11 +59,11 @@ const likeCard = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
+      console.log(card);
       if (!card) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
-      } else {
-        res.send({ card });
+        return next(new NotFoundError('Карточка не найдена'));
       }
+      return res.send({ card });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
@@ -84,10 +83,9 @@ const dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
-      } else {
-        res.send({ card });
+        return next(new NotFoundError('Карточка не найдена'));
       }
+      return res.send({ card });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
