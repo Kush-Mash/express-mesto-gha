@@ -59,7 +59,6 @@ const likeCard = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      console.log(card);
       if (!card) {
         return next(new NotFoundError('Карточка не найдена'));
       }

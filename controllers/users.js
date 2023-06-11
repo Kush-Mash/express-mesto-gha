@@ -2,12 +2,14 @@ const { default: mongoose } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const signToken = require('../utils/jwtAuth').signToken;
+
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
   MONGO_DUPLICATE_KEY_ERROR,
   SALT_ROUNDS,
 } = require('../utils/constants');
+
 const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
 const UnhandledError = require('../errors/UnhandledError');
@@ -22,9 +24,7 @@ const login = (req, res, next) => {
     .orFail(() => {
       throw new Error('Unauthorized');
     })
-    .then((user) => {
-      return Promise.all([user, bcrypt.compare(password, user.password)]);
-    })
+    .then((user) => Promise.all([user, bcrypt.compare(password, user.password)]))
     .then(([user, isEqual]) => {
       if (!isEqual) {
         throw new ValidationError('Переданы некорректные данные при создании пользователя');
@@ -53,12 +53,18 @@ const getUsers = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { email, password, name, about, avatar } = req.body;
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
 
   bcrypt.hash(password, SALT_ROUNDS).then((hash) => {
-    User.create({ email, password: hash, name, about, avatar })
+    User.create({
+      email, password: hash, name, about, avatar,
+    })
       .then(() => {
-        res.status(HTTP_STATUS_CREATED).send({ email, name, about, avatar });
+        res.status(HTTP_STATUS_CREATED).send({
+          email, name, about, avatar,
+        });
       })
       .catch((err) => {
         if (err instanceof mongoose.Error.ValidationError) {

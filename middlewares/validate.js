@@ -1,7 +1,7 @@
-const { celebrate, Joi, errors, Segments } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 
 const isUrlValid = (url) => {
-  const regex = /^((http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-\/])*)?/g;
+  const regex = /^(https?:\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/g;
   if (regex.test(url)) {
     return url;
   }
