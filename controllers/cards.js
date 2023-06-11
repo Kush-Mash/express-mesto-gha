@@ -44,7 +44,7 @@ const deleteCard = (req, res, next) => {
         throw new ForbiddenError('Отсутствуют права доступа для удаления данной карточки');
       }
       Card.findByIdAndRemove(cardId)
-        .then((card) => res.send(card))
+        .then((removedCard) => res.status(HTTP_STATUS_OK).send(removedCard))
         .catch(() => {
           throw new UnhandledError('Ошибка сервера');
         })
