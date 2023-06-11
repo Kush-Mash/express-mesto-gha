@@ -35,12 +35,12 @@ const createCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  const { userId } = req.user._id;
+  // const { userId } = req.user._id;
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Передан несуществующий id карточки');
-      } else if (card.owner._id.toString() !== userId) {
+      } else if (card.owner.toString() !== req.user._id.valueOf()) {
         throw new ForbiddenError('Отсутствуют права доступа для удаления данной карточки');
       }
       Card.findByIdAndRemove(cardId)
