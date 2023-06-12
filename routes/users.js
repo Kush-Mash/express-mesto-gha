@@ -3,7 +3,6 @@ const usersController = require('../controllers/users');
 const usersValidate = require('../middlewares/validate');
 
 router.get('/', usersController.getUsers);
-router.post('/', usersValidate.validateUserCreate, usersController.createUser);
 router.patch('/me', usersValidate.validateUpdateUser, usersController.updateUser);
 router.patch('/me/avatar', usersValidate.validateAvatar, usersController.updateUserAvatar);
 router.get('/me', usersController.getCurrentUser);

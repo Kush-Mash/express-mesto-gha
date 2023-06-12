@@ -1,7 +1,7 @@
-const HTTP_STATUS_INTERNAL_SERVER_ERROR = require('../utils/constants');
-
 const errorHandler = (err, req, res, next) => {
-  const { statusCode = HTTP_STATUS_INTERNAL_SERVER_ERROR, message = 'Ошибка сервера' } = err;
+  const statusCode = err.statusCode || 500;
+
+  const message = statusCode === 500 ? 'Ошибка сервера' : err.message;
   res.status(statusCode)
     .send({ message });
 

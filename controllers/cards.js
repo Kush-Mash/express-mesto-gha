@@ -1,20 +1,12 @@
 const { default: mongoose } = require('mongoose');
 const Card = require('../models/card');
-const {
-  HTTP_STATUS_OK,
-  HTTP_STATUS_CREATED,
-} = require('../utils/constants');
 const ValidationError = require('../errors/ValidationError');
-const UnhandledError = require('../errors/UnhandledError');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
 const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(HTTP_STATUS_OK).send({ data: cards }))
-    .catch(() => {
-      throw new UnhandledError('Ошибка сервера');
-    })
+    .then((cards) => res.send({ data: cards }))
     .catch(next);
 };
 
@@ -22,15 +14,14 @@ const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
-    .then((card) => res.status(HTTP_STATUS_CREATED).send({ data: card }))
+    .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        throw new ValidationError('Переданы некорректные данные при создании карточки');
+        next(new ValidationError('Переданы некорректные данные при создании карточки'));
       } else {
-        throw new UnhandledError('Ошибка сервера');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const deleteCard = (req, res, next) => {
@@ -43,10 +34,7 @@ const deleteCard = (req, res, next) => {
         throw new ForbiddenError('Отсутствуют права доступа для удаления данной карточки');
       }
       Card.findByIdAndRemove(cardId)
-        .then((removedCard) => res.status(HTTP_STATUS_OK).send(removedCard))
-        .catch(() => {
-          throw new UnhandledError('Ошибка сервера');
-        })
+        .then((removedCard) => res.send(removedCard))
         .catch(next);
     })
     .catch(next);
@@ -66,12 +54,11 @@ const likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        throw new ValidationError('Переданы некорректные данные для постановки лайка');
+        next(new ValidationError('Переданы некорректные данные для постановки лайка'));
       } else {
-        throw new UnhandledError('Ошибка сервера');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const dislikeCard = (req, res, next) => {
@@ -88,12 +75,11 @@ const dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
-        throw new ValidationError('Переданы некорректные данные для снятии лайка');
+        next(new ValidationError('Переданы некорректные данные для снятии лайка'));
       } else {
-        throw new UnhandledError('Ошибка сервера');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports = {

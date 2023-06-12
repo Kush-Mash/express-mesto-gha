@@ -3,16 +3,11 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { signToken } = require('../utils/jwtAuth');
 
-const {
-  HTTP_STATUS_OK,
-  HTTP_STATUS_CREATED,
-  MONGO_DUPLICATE_KEY_ERROR,
-  SALT_ROUNDS,
-} = require('../utils/constants');
+const MONGO_DUPLICATE_KEY_ERROR = 11000;
+const SALT_ROUNDS = 10;
 
 const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
-const UnhandledError = require('../errors/UnhandledError');
 const NotFoundError = require('../errors/NotFoundError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
@@ -27,28 +22,23 @@ const login = (req, res, next) => {
     .then((user) => Promise.all([user, bcrypt.compare(password, user.password)]))
     .then(([user, isEqual]) => {
       if (!isEqual) {
-        throw new ValidationError('Переданы некорректные данные при создании пользователя');
+        throw new UnauthorizedError('Пользователь не авторизован');
       }
-
       const token = signToken({ _id: user._id });
-
-      res.status(HTTP_STATUS_OK).send({ message: 'авторизован', token });
+      res.send({ message: 'авторизован', token });
     })
     .catch((err) => {
       if (err.message === 'Unauthorized') {
-        throw new UnauthorizedError('Пользователь не авторизован');
+        next(new UnauthorizedError('Пользователь не авторизован'));
+      } else {
+        next(err);
       }
-      throw new UnhandledError('Ошибка сервера');
-    })
-    .catch(next);
+    });
 };
 
 const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(HTTP_STATUS_OK).send({ users }))
-    .catch(() => {
-      throw new UnhandledError('Ошибка сервера');
-    })
+    .then((users) => res.send({ users }))
     .catch(next);
 };
 
@@ -62,21 +52,21 @@ const createUser = (req, res, next) => {
       email, password: hash, name, about, avatar,
     })
       .then(() => {
-        res.status(HTTP_STATUS_CREATED).send({
+        res.status(201).send({
           email, name, about, avatar,
         });
       })
       .catch((err) => {
         if (err instanceof mongoose.Error.ValidationError) {
-          throw new ValidationError('Переданы некорректные данные при создании пользователя');
+          next(new ValidationError('Переданы некорректные данные при создании пользователя'));
         } else if (err.code === MONGO_DUPLICATE_KEY_ERROR) {
-          throw new ConflictError('Такой пользователь уже существует');
+          next(new ConflictError('Такой пользователь уже существует'));
         } else {
-          throw new UnhandledError('Ошибка сервера');
+          next(err);
         }
-      })
-      .catch(next);
-  });
+      });
+  })
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
@@ -85,14 +75,13 @@ const getUserById = (req, res, next) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        throw new NotFoundError('Пользователь с указанным id не найден');
+        next(new NotFoundError('Пользователь с указанным id не найден'));
       } else if (err instanceof mongoose.Error.CastError) {
-        throw new ValidationError('Передан некорректный id');
+        next(new ValidationError('Передан некорректный id'));
       } else {
-        throw new UnhandledError('Ошибка сервера');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const updateUser = (req, res, next) => {
@@ -111,12 +100,11 @@ const updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        throw new ValidationError('Переданы некорректные данные при обновлении профиля');
+        next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
       } else {
-        throw new UnhandledError('Ошибка сервера');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const updateUserAvatar = (req, res, next) => {
@@ -135,12 +123,11 @@ const updateUserAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        throw new ValidationError('Переданы некорректные данные при обновлении аватара');
+        next(new ValidationError('Переданы некорректные данные при обновлении аватара'));
       } else {
-        throw new UnhandledError('Ошибка сервера');
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 const getCurrentUser = (req, res, next) => {
